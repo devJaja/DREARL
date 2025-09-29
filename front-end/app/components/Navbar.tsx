@@ -1,21 +1,40 @@
 // components/Navbar.tsx
 'use client'
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Globe as Globe2, Wallet, Menu, X } from 'lucide-react';
+import { Globe as Globe2, Wallet, Menu, X, LayoutDashboard } from 'lucide-react';
 import { useAccount } from "wagmi";
 
 
-interface NavbarProps {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (open: boolean) => void;
-  scrollY: number;
-  scrollToSection: (id: string) => void;
-}
+import { usePathname } from 'next/navigation';
 
-const Navbar: React.FC<NavbarProps> = ({ isMenuOpen, setIsMenuOpen, scrollY, scrollToSection }) => {
+const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
   const { isConnected } = useAccount();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    if (pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        setIsMenuOpen(false);
+      }
+    } else {
+      router.push(`/#${sectionId}`);
+      setIsMenuOpen(false);
+    }
+  };
 
   return (
     <motion.nav
@@ -35,13 +54,7 @@ const Navbar: React.FC<NavbarProps> = ({ isMenuOpen, setIsMenuOpen, scrollY, scr
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => scrollToSection('hero')}
           >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center"
-            >
-              <Globe2 className="w-6 h-6 text-white" />
-            </motion.div>
+            <img src="/DREARL-LOGO.png" alt="DREARL Logo" className="h-8 w-auto sm:h-10" />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               DREARL
             </span>
@@ -65,14 +78,24 @@ const Navbar: React.FC<NavbarProps> = ({ isMenuOpen, setIsMenuOpen, scrollY, scr
                 {item.name}
               </motion.button>
             ))}
-          </div>
+            {isConnected && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/dashboard')}
+                className="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition-colors duration-300 font-medium"
+              >
+                <LayoutDashboard size={20} />
+                Dashboard
+              </motion.button>
+            )}
 
           {/* Connect Wallet Button & Mobile Menu */}
           <div className="flex items-center gap-4">
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
               whileTap={{ scale: 0.95 }}
-              className="hidden sm:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-400/30 transition-all duration-300"
+              className="hidden sm:flex items-center gap-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-400/30 transition-all duration-300"
             >
               <Wallet className="w-5 h-5" />
 <w3m-button />            
@@ -113,16 +136,26 @@ const Navbar: React.FC<NavbarProps> = ({ isMenuOpen, setIsMenuOpen, scrollY, scr
                 {item.name}
               </button>
             ))}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold mt-4"
+            {isConnected && (
+              <button
+                onClick={() => { router.push('/dashboard'); setIsMenuOpen(false); }}
+                className="flex items-center gap-3 w-full text-left text-gray-300 hover:text-blue-400 transition-colors duration-300 font-medium py-2"
+              >
+                <LayoutDashboard size={20} />
+                Dashboard
+              </button>
+            )}
+               <motion.button
+              whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+              className="hidden sm:flex items-center gap-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-400/30 transition-all duration-300"
             >
               <Wallet className="w-5 h-5" />
-              Connect Wallet
-            </motion.button>
+<w3m-button />            
+</motion.button>
           </div>
         </motion.div>
+      </div>
       </div>
     </motion.nav>
   );

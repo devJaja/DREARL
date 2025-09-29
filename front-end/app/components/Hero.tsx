@@ -68,25 +68,25 @@ const Hero: React.FC = () => {
             <Globe2 className="w-20 h-20 text-blue-400" />
           </motion.div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 bg-clip-text text-transparent">
             DREARL
           </h1>
           
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-6">
             Revolutionizing Real Estate with Blockchain
           </h2>
           
-          <div className="flex items-center gap-4 mb-8 text-xl text-gray-300">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mb-8 text-lg sm:text-xl text-gray-300">
             <span className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-blue-400" />
               Transparent
             </span>
-            <span className="text-blue-400">•</span>
+            <span className="text-blue-400 hidden sm:inline">•</span>
             <span className="flex items-center gap-2">
               <Lock className="w-6 h-6 text-purple-400" />
               Secure
             </span>
-            <span className="text-purple-400">•</span>
+            <span className="text-purple-400 hidden sm:inline">•</span>
             <span className="flex items-center gap-2">
               <Users className="w-6 h-6 text-cyan-400" />
               Decentralized
@@ -103,7 +103,7 @@ const Hero: React.FC = () => {
               onClick={handleGetStarted}
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)" }}
               whileTap={{ scale: 0.95 }}
-              className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-xl font-semibold flex items-center justify-center gap-3 transition-all duration-300"
+              className="group px-6 sm:px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-lg sm:text-xl font-semibold flex items-center justify-center gap-3 transition-all duration-300"
             >
               Get Started
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -112,7 +112,7 @@ const Hero: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="group px-8 py-4 border-2 border-cyan-400 rounded-full text-xl font-semibold flex items-center justify-center gap-3 hover:bg-cyan-400 hover:text-gray-900 transition-all duration-300"
+              className="group px-6 sm:px-8 py-4 border-2 border-cyan-400 rounded-full text-lg sm:text-xl font-semibold flex items-center justify-center gap-3 hover:bg-cyan-400 hover:text-gray-900 transition-all duration-300"
             >
               <Play className="w-5 h-5" />
               Learn More

@@ -5,11 +5,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Globe as Globe2, Twitter, Linkedin, Send } from 'lucide-react';
 
-interface FooterProps {
-  scrollToSection: (id: string) => void;
-}
+import { useRouter } from 'next/navigation';
 
-const Footer: React.FC<FooterProps> = ({ scrollToSection }) => {
+const Footer: React.FC = () => {
+  const router = useRouter();
+
+  const scrollToSection = (sectionId: string) => {
+    router.push(`/#${sectionId}`);
+  };
   return (
     <footer className="py-16 px-6 bg-gray-900 border-t border-gray-800">
       <div className="max-w-7xl mx-auto">
@@ -19,9 +22,8 @@ const Footer: React.FC<FooterProps> = ({ scrollToSection }) => {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-xl flex items-center justify-center"
               >
-                <Globe2 className="w-8 h-8 text-white" />
+                <img src="/DREARL-LOGO.png" alt="DREARL Logo" className="h-12 w-auto" />
               </motion.div>
               <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                 DREARL
