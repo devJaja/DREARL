@@ -4,7 +4,7 @@ import { wagmiAdapter, projectId } from '../config'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createAppKit } from '@reown/appkit/react'
 import { mainnet, arbitrum } from '@reown/appkit/networks'
-import { AppProvider } from './ModalContext';
+import { AppProvider } from './AppContext';
 import React, { type ReactNode } from 'react'
 import { cookieToInitialState, WagmiProvider, type Config } from 'wagmi'
 

@@ -5,7 +5,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Globe as Globe2, Shield, Lock, Users, Home, Database, ArrowRight, Play } from 'lucide-react';
 
-import { useAppContext } from '@/app/context/ModalContext';
+import { useAppContext } from '@/app/context/AppContext';
 
 const Hero: React.FC = () => {
   const { handleGetStarted } = useAppContext();

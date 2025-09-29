@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, User, Home, Briefcase, MapPin, Wallet } from 'lucide-react';
-import { useAppContext } from '@/app/context/ModalContext';
+import { useAppContext } from '@/app/context/AppContext';
 import { useAccount } from 'wagmi';
 
 const RegistrationModal = () => {
