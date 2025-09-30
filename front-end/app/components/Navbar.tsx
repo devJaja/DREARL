@@ -90,6 +90,7 @@ const Navbar: React.FC = () => {
               </motion.button>
             )}
 
+
           {/* Connect Wallet Button & Mobile Menu */}
           <div className="flex items-center gap-4">
             <motion.button
@@ -145,6 +146,7 @@ const Navbar: React.FC = () => {
                 Dashboard
               </button>
             )}
+
                <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
               whileTap={{ scale: 0.95 }}

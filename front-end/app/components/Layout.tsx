@@ -4,12 +4,15 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/app/components/Navbar';
 import { usePathname } from 'next/navigation';
+import { useAppContext } from '@/app/context/AppContext';
+import AddPropertyModal from '@/app/components/modals/AddPropertyModal';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { isAddPropertyModalOpen } = useAppContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const pathname = usePathname();
@@ -42,6 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         scrollToSection={scrollToSection} 
       />
       {children}
+      {isAddPropertyModalOpen && <AddPropertyModal />}
     </div>
   );
 };

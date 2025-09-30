@@ -4,7 +4,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Home, Briefcase } from 'lucide-react';
-import { useAppContext } from '@/app/context/ModalContext';
+import { useAppContext } from '@/app/context/AppContext';
 
 const RoleSelectionModal = () => {
   const { isRoleModalOpen, setRoleModalOpen, handleRoleSelect } = useAppContext();

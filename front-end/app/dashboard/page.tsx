@@ -11,24 +11,32 @@ import {
 } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
+import { useAppContext } from '@/app/context/AppContext';
+import AddPropertyModal from '@/app/components/modals/AddPropertyModal';
 
 // --- Mock Data and Types ---
-interface Property {
+interface Asset {
   id: number;
-  name: string;
-  location: string;
-  type: string;
-  price: number;
-  image: string;
-  owner: string;
+  type: 'Property' | 'Land';
+  isVerified: boolean;
+  forSale: boolean;
+  imageCID?: string;
+  name?: string; // For Property
+  // Land specific
+  numberOfPlots?: number;
+  titleNumber?: number;
+  state?: string;
+  lga?: string;
+  city?: string;
+  pricePerPlot?: number;
+  coFoCID?: string;
+  // Property specific
+  landIndex?: number;
+  numberOfRooms?: number;
+  numberOfBathrooms?: number;
+  price?: number;
+  owner?: string;
 }
-
-const initialProperties: Property[] = [
-  { id: 1, name: 'Serene Villa', location: 'Lagos, Nigeria', type: 'Residential', price: 750000, image: 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', owner: 'John Doe' },
-  { id: 2, name: 'Urban Loft', location: 'Nairobi, Kenya', type: 'Apartment', price: 450000, image: 'https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', owner: 'John Doe' },
-  { id: 3, name: 'Coastal Paradise', location: 'Accra, Ghana', type: 'Beach House', price: 1200000, image: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', owner: 'Jane Smith' },
-  { id: 4, name: 'Modern Office Space', location: 'Kigali, Rwanda', type: 'Commercial', price: 950000, image: 'https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', owner: 'John Doe' },
-];
 
 // --- Reusable Components ---
 const SkeletonCard = () => (
@@ -52,7 +60,7 @@ const InfoCard = ({ icon, title, value }: { icon: React.ReactNode, title: string
   </motion.div>
 );
 
-const PropertyCard = ({ prop, onEdit, onDelete, role, userData, onViewDetails }: { prop: Property, onEdit: (p: Property) => void, onDelete: (p: Property) => void, role: string, userData: any, onViewDetails: (p: Property) => void }) => (
+const PropertyCard = ({ prop, onEdit, onDelete, role, userData, onViewDetails }: { prop: Asset, onEdit: (p: Asset) => void, onDelete: (p: Asset) => void, role: string, userData: any, onViewDetails: (p: Asset) => void }) => (
   <motion.div
     layout
     initial={{ opacity: 0, scale: 0.8 }}
@@ -62,19 +70,19 @@ const PropertyCard = ({ prop, onEdit, onDelete, role, userData, onViewDetails }:
     className="bg-gray-800/50 border border-blue-500/20 rounded-2xl overflow-hidden group"
   >
     <div className="relative">
-      <img src={prop.image} alt={prop.name} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+      <img src={prop.imageCID || 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'} alt={prop.type} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       <div className="absolute bottom-4 left-4">
-        <h3 className="text-2xl font-bold text-white">{prop.name}</h3>
-        <p className="text-gray-300 flex items-center gap-2"><MapPin size={16} /> {prop.location}</p>
+        <h3 className="text-2xl font-bold text-white">{prop.type === 'Land' ? `${prop.state}, ${prop.city}` : prop.name}</h3>
+        <p className="text-gray-300 flex items-center gap-2"><MapPin size={16} /> {prop.type === 'Land' ? prop.lga : `${prop.numberOfRooms} rooms, ${prop.numberOfBathrooms} baths`}</p>
       </div>
     </div>
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <span className="text-sm font-semibold bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">{prop.type}</span>
-        <span className="text-2xl font-bold text-green-400">${prop.price.toLocaleString()}</span>
+        <span className="text-2xl font-bold text-green-400">${prop.type === 'Land' ? prop.pricePerPlot?.toLocaleString() : prop.price?.toLocaleString()}</span>
       </div>
-      <p className="text-gray-400 mb-4 flex items-center gap-2"><User size={16} /> Owned by {prop.owner}</p>
+      <p className="text-gray-400 mb-4 flex items-center gap-2"><User size={16} /> Owned by {prop.owner || 'N/A'}</p>
       
       {role === 'Landowner' && prop.owner === userData?.details.fullName && (
         <div className="flex justify-end gap-4 mt-4 border-t border-gray-700 pt-4">
@@ -98,126 +106,130 @@ const PropertyCard = ({ prop, onEdit, onDelete, role, userData, onViewDetails }:
 
 // --- Main Dashboard Component ---
 const Dashboard = () => {
+  const { isAddPropertyModalOpen, setAddPropertyModalOpen } = useAppContext();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   // Dashboard state
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // For Add/Edit Property Modal
-  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false); // For Property Details Modal
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null); // For Property Details Modal
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null); // For Property Details Modal
   const [role, setRole] = useState('Buyer'); // Default role
   const [searchTerm, setSearchTerm] = useState('');
 
   // Form state
-  const [formState, setFormState] = useState({ name: '', location: '', type: '', price: '', image: '' });
+  const [formState, setFormState] = useState({});
   const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
-    // Simulate fetching user data and properties
-    setTimeout(() => {
-      const savedData = localStorage.getItem('userData');
-      if (savedData) {
-        const parsedData = JSON.parse(savedData);
-        setUserData(parsedData);
-        setRole(parsedData.role || 'Buyer');
-      } else {
-        // Mock user data if not in local storage for demo
-        const mockUser = {
-          role: 'Landowner',
-          details: { fullName: 'John Doe', location: 'Lagos, Nigeria' },
-          walletAddress: '0x123...abc'
-        };
-        setUserData(mockUser);
-        setRole(mockUser.role);
-        localStorage.setItem('userData', JSON.stringify(mockUser));
-      }
+    const handleStorageChange = () => {
+      const savedAssets = localStorage.getItem('assets');
+      setAssets(savedAssets ? JSON.parse(savedAssets) : []);
+    };
 
-      const savedProperties = localStorage.getItem('properties');
-      setProperties(savedProperties ? JSON.parse(savedProperties) : initialProperties);
-      setIsLoading(false);
-    }, 1500);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
-      localStorage.setItem('properties', JSON.stringify(properties));
-    }
-  }, [properties, isLoading]);
+    if (typeof window !== 'undefined') {
+      // Simulate fetching user data and properties
+      setTimeout(() => {
+        const savedData = localStorage.getItem('userData');
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setUserData(parsedData);
+          setRole(parsedData.role || 'Buyer');
+        } else {
+          // Mock user data if not in local storage for demo
+          const mockUser = {
+            role: 'Landowner',
+            details: { fullName: 'John Doe', location: 'Lagos, Nigeria' },
+            walletAddress: '0x123...abc'
+          };
+          setUserData(mockUser);
+          setRole(mockUser.role);
+          localStorage.setItem('userData', JSON.stringify(mockUser));
+        }
 
-  const validate = () => {
-    const newErrors: any = {};
-    if (!formState.name) newErrors.name = 'Property name is required';
-    if (!formState.location) newErrors.location = 'Location is required';
-    if (!formState.type) newErrors.type = 'Property type is required';
-    if (!formState.price || isNaN(Number(formState.price))) newErrors.price = 'A valid price is required';
-    if (!formState.image) newErrors.image = 'Image is required';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+        const savedAssets = localStorage.getItem('assets');
+        setAssets(savedAssets ? JSON.parse(savedAssets) : []);
+        setIsLoading(false);
+      }, 1500);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !isLoading) {
+      localStorage.setItem('assets', JSON.stringify(assets));
+    }
+  }, [assets, isLoading]);
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    // Validation logic can be added here if needed
 
-    const newProperty: Property = {
-      id: editingProperty ? editingProperty.id : Date.now(),
-      name: formState.name,
-      location: formState.location,
-      type: formState.type,
-      price: Number(formState.price),
-      image: formState.image,
+    const newAsset: Asset = {
+      id: editingAsset ? editingAsset.id : Date.now(),
+      ...formState,
       owner: userData.details.fullName,
-    };
+    } as Asset;
 
-    if (editingProperty) {
-      setProperties(properties.map(p => p.id === editingProperty.id ? newProperty : p));
+    if (editingAsset) {
+      setAssets(assets.map(p => p.id === editingAsset.id ? newAsset : p));
     } else {
-      setProperties([newProperty, ...properties]);
+      setAssets([newAsset, ...assets]);
     }
     closeModal();
   };
 
-  const openModal = (prop: Property | null) => {
-    setEditingProperty(prop);
-    setFormState(prop ? { ...prop, price: String(prop.price) } : { name: '', location: '', type: '', price: '', image: '' });
+  const openModal = (asset: Asset | null) => {
+    setEditingAsset(asset);
+    setFormState(asset ? asset : {});
     setErrors({});
-    setIsModalOpen(true);
+    setAddPropertyModalOpen(true);
   };
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => setAddPropertyModalOpen(false);
 
-  const handleDelete = (propToDelete: Property) => {
-    setProperties(properties.filter(p => p.id !== propToDelete.id));
+  const handleDelete = (assetToDelete: Asset) => {
+    setAssets(assets.filter(p => p.id !== assetToDelete.id));
   };
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
 
-  const openDeleteModal = (property: Property) => {
-    setPropertyToDelete(property);
+  const openDeleteModal = (asset: Asset) => {
+    setAssetToDelete(asset);
     setShowDeleteModal(true);
   };
 
   const confirmDelete = () => {
-    if (propertyToDelete) {
-      handleDelete(propertyToDelete);
+    if (assetToDelete) {
+      handleDelete(assetToDelete);
       setShowDeleteModal(false);
-      setPropertyToDelete(null);
+      setAssetToDelete(null);
     }
   };
 
-  const handleViewDetails = (prop: Property) => {
-    setSelectedProperty(prop);
+  const handleViewDetails = (asset: Asset) => {
+    setSelectedAsset(asset);
     setIsDetailsModalOpen(true);
   };
 
-  const filteredProperties = properties.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAssets = assets.filter(p => {
+    if (p.type === 'Land') {
+      return (p.state && p.state.toLowerCase().includes(searchTerm.toLowerCase())) ||
+             (p.city && p.city.toLowerCase().includes(searchTerm.toLowerCase()));
+    } else {
+      return p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+  });
 
   if (isLoading) {
     return (
@@ -328,16 +340,16 @@ const Dashboard = () => {
 
           <AnimatePresence>
             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map((prop) => (
+              {filteredAssets.map((prop) => (
                 <PropertyCard key={prop.id} prop={prop} onEdit={openModal} onDelete={openDeleteModal} role={role} userData={userData} onViewDetails={handleViewDetails} />
               ))}
             </motion.div>
           </AnimatePresence>
           
-          {filteredProperties.length === 0 && (
+          {filteredAssets.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-2xl font-bold text-gray-500">No properties found.</p>
-              <p className="text-gray-400">Try adjusting your search or add a new property.</p>
+              <p className="text-2xl font-bold text-gray-500">No assets found.</p>
+              <p className="text-gray-400">Try adjusting your search or add a new asset.</p>
             </div>
           )}
         </motion.div>
@@ -346,47 +358,7 @@ const Dashboard = () => {
       <Footer />
 
       <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-lg z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: -50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: -50 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="bg-gray-800/80 border border-blue-500/20 rounded-2xl shadow-2xl w-full max-w-lg"
-            >
-              <form onSubmit={handleFormSubmit} className="p-8">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">{editingProperty ? 'Edit Property' : 'Add New Property'}</h2>
-                  <motion.button type="button" whileHover={{ scale: 1.2, rotate: 90 }} onClick={closeModal}><X /></motion.button>
-                </div>
-                <div className="space-y-4">
-                  <FormInput name="name" placeholder="Property Name" value={formState.name} onChange={setFormState} error={errors.name} icon={<Building />} />
-                  <FormInput name="location" placeholder="Location" value={formState.location} onChange={setFormState} error={errors.location} icon={<MapPin />} />
-                  <FormInput name="type" placeholder="Property Type (e.g., Residential)" value={formState.type} onChange={setFormState} error={errors.type} icon={<Home />} />
-                  <FormInput name="price" placeholder="Price (USD)" value={formState.price} onChange={setFormState} error={errors.price} icon={<DollarSign />} type="number" />
-                  <FormInput name="image" placeholder="Image" value={formState.image} onChange={setFormState} error={errors.image} icon={<ImageIcon />} type="file" />
-                </div>
-                <div className="flex justify-end gap-4 mt-8">
-                  <motion.button type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={closeModal} className="px-6 py-2 bg-gray-600 rounded-lg">Cancel</motion.button>
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)" }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-semibold"
-                  >
-                    {editingProperty ? 'Save Changes' : 'Add Property'}
-                  </motion.button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
+        {isAddPropertyModalOpen && <AddPropertyModal />}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -411,7 +383,7 @@ const Dashboard = () => {
                 <AlertTriangle className="w-10 h-10 text-red-500" />
               </motion.div>
               <h2 className="text-2xl font-bold mt-6 mb-2">Are you sure?</h2>
-              <p className="text-gray-400 mb-8">This action is irreversible and will permanently delete the property \"{propertyToDelete?.name}\".</p>
+              <p className="text-gray-400 mb-8">This action is irreversible and will permanently delete the {assetToDelete?.type} at "{assetToDelete?.type === 'Land' ? `${assetToDelete.state}, ${assetToDelete.city}` : `Property`}".</p>
               <div className="flex justify-center gap-4">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowDeleteModal(false)} className="px-8 py-3 bg-gray-600 rounded-lg font-semibold">Cancel</motion.button>
                 <motion.button
