@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IERC721NFT.sol"; // Adjusted path to interface
 
-contract MockERC721 is ERC721, ERC721URIStorage, Ownable, IERC721NFT {
+contract MockERC721 is ERC721, ERC721URIStorage, Ownable, INFT {
     uint256 public nextTokenId;
 
     constructor() ERC721("MockNFT", "MNFT") Ownable(msg.sender) {
@@ -82,7 +82,7 @@ contract MockERC721 is ERC721, ERC721URIStorage, Ownable, IERC721NFT {
         address to,
         uint256 tokenId,
         bytes memory data
-    ) public override(ERC721, IERC721NFT) {
+    ) public override(ERC721, INFT) {
         ERC721.safeTransferFrom(from, to, tokenId, data);
     }
 
@@ -90,7 +90,12 @@ contract MockERC721 is ERC721, ERC721URIStorage, Ownable, IERC721NFT {
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721, IERC721NFT) {
+    ) public override(ERC721, INFT) {
         ERC721.safeTransferFrom(from, to, tokenId);
+    }
+
+    function transferToken(address from, address to, uint256 id, uint256 amount) public override {
+        // Assuming amount is 1 for ERC721-like transfer
+        _transfer(from, to, id);
     }
 }
