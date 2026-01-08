@@ -78,8 +78,8 @@ const Navbar: React.FC = () => {
                 {item.name}
               </motion.button>
             ))}
-            {isConnected && (
-              <motion.button
+
+                <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push('/dashboard')}
@@ -88,7 +88,6 @@ const Navbar: React.FC = () => {
                 <LayoutDashboard size={20} />
                 Dashboard
               </motion.button>
-            )}
 
 
           {/* Connect Wallet Button & Mobile Menu */}
@@ -99,7 +98,7 @@ const Navbar: React.FC = () => {
               className="hidden sm:flex items-center gap-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-400/30 transition-all duration-300"
             >
               <Wallet className="w-5 h-5" />
-<w3m-button />            
+Connect Wallet
 </motion.button>
 
             {/* Mobile Menu Button */}
@@ -137,15 +136,9 @@ const Navbar: React.FC = () => {
                 {item.name}
               </button>
             ))}
-            {isConnected && (
-              <button
-                onClick={() => { router.push('/dashboard'); setIsMenuOpen(false); }}
-                className="flex items-center gap-3 w-full text-left text-gray-300 hover:text-blue-400 transition-colors duration-300 font-medium py-2"
-              >
-                <LayoutDashboard size={20} />
-                Dashboard
-              </button>
-            )}
+            
+              
+
 
                <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" }}
@@ -153,7 +146,7 @@ const Navbar: React.FC = () => {
               className="hidden sm:flex items-center gap-2 px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full font-semibold hover:shadow-lg hover:shadow-blue-400/30 transition-all duration-300"
             >
               <Wallet className="w-5 h-5" />
-<w3m-button />            
+Connect Wallet            
 </motion.button>
           </div>
         </motion.div>

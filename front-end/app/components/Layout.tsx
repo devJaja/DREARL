@@ -38,12 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white overflow-x-hidden">
-      <Navbar 
-        isMenuOpen={isMenuOpen} 
-        setIsMenuOpen={setIsMenuOpen} 
-        scrollY={scrollY} 
-        scrollToSection={scrollToSection} 
-      />
+      <Navbar />
       {children}
       {isAddPropertyModalOpen && <AddPropertyModal />}
     </div>
