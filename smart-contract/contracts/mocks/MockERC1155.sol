@@ -33,8 +33,8 @@ contract MockERC1155 is ERC1155, Ownable, INFT {
     }
 
     function transferToken(address from, address to, uint256 id, uint256 amount) public override {
-        // This function from INFT is implemented using ERC1155's _transferFrom
-        _transferFrom(from, to, id, amount, "");
+        // This function from INFT is implemented using ERC1155's _transfer
+        _transfer(from, to, id, amount, "");
     }
     
     // ERC1155 already has setApprovalForAll, no need to re-implement if its signature matches INFT's
