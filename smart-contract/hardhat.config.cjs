@@ -11,6 +11,9 @@ const config = {
       },
     },
   },
+  paths: {
+    sources: "./contracts",
+  },
 };
 
 module.exports = config;
